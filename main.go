@@ -11,7 +11,7 @@ func main() {
 	mux := http.NewServeMux()
 	corsMux := middlewareCors(mux)
 
-	server := http.Server{
+	server := &http.Server{
 		Addr:    ":" + port,
 		Handler: corsMux,
 	}
