@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -22,6 +23,7 @@ func main() {
 	mux.HandleFunc("GET /api/healthz", healthHandler)
 	mux.HandleFunc("GET /admin/metrics", apiCfg.metricsHandler)
 	mux.HandleFunc("/api/reset", apiCfg.resetHandler)
+	mux.HandleFunc("/api/validate_chirp", validateChirpHandler)
 
 	corsMux := middlewareCors(mux)
 
@@ -47,6 +49,13 @@ func middlewareCors(next http.Handler) http.Handler {
 	})
 }
 
+func (cfg *apiConfig) middlewareMetricInc(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cfg.fileserverHits++
+		next.ServeHTTP(w, r)
+	})
+}
+
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -65,9 +74,17 @@ func (cfg *apiConfig) resetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hits reset to 0"))
 }
 
-func (cfg *apiConfig) middlewareMetricInc(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cfg.fileserverHits++
-		next.ServeHTTP(w, r)
-	})
+func validateChirpHandler(w http.ResponseWriter, r *http.Request) {
+	type chirpBody struct {
+		Body string `json:"body"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	chirp := chirpBody{}
+	err := decoder.Decode(&chirp)
+	if err != nil {
+		log.Printf("Error decoding chirp body: %s", err)
+		w.WriteHeader(500)
+		return
+	}
 }
