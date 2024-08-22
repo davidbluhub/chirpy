@@ -7,12 +7,17 @@ import (
 	"strings"
 )
 
-func validateChirpHandler(w http.ResponseWriter, r *http.Request) {
+func getChirps(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func postChirp(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Body string `json:"body"`
 	}
 	type returnVals struct {
-		Body string `json:"cleaned_body"`
+		Id   int    `json:"id"`
+		Body string `json:"body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -35,10 +40,12 @@ func validateChirpHandler(w http.ResponseWriter, r *http.Request) {
 		"fornax":    "****",
 	}
 
-	outBody := filterBadWords(params.Body, badWords)
+	returnBody := filterBadWords(params.Body, badWords)
+	returnId := 1
 
 	respondWithJSON(w, http.StatusOK, returnVals{
-		Body: outBody,
+		Id:   returnId,
+		Body: returnBody,
 	})
 }
 
