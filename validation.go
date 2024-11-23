@@ -7,9 +7,9 @@ import (
 	"strings"
 )
 
-func getChirps(w http.ResponseWriter, r *http.Request) {
-
-}
+// func getChirps(w http.ResponseWriter, r *http.Request) {
+//
+// }
 
 func postChirp(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
